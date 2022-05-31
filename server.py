@@ -5,8 +5,22 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
+    return render_template('index.html')
+
+
+@app.route('/register')
+def register_user():
     pass
 
+
+@app.route('/login')
+def login():
+    pass
+
+
+@app.route('/logout')
+def logout():
+    pass
 
 if __name__ == "__main__":
     app.run(
