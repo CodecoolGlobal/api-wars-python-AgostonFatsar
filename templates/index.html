@@ -4,7 +4,7 @@
     <nav class="navbar bg-light">
             <ul class="nav navmenu">
                 <li class="nav-item">
-                    <a href="#" class="nav-link text-secondary">Planet list</a>
+                    <a href="/" class="nav-link text-secondary">Planet list</a>
                 </li>
                 <li class="nav-item">
                     <a href="#" class="nav-link text-secondary">Voting statistics</a>
@@ -26,8 +26,8 @@
         </div>
         <div class="row">
             <div class="container-fluid pb-3 gx-0">
-                    <button class="btn btn-primary active" disabled>Previous</button>
-                <button class="btn btn-primary active">Next</button>
+                    <button class="btn btn-primary active" id="previous" disabled>Previous</button>
+                <button class="btn btn-primary active" id="next">Next</button>
             </div>
         </div>
         <div class="row">
@@ -41,9 +41,9 @@
             </thead>
             <tbody>
                 {% for i in range(10) %}
-                    <tr>
+                    <tr class="table_body">
                         {% for i in range(8) %}
-                            <td>i</td>
+                            <td></td>
                         {% endfor %}
                     </tr>
                 {% endfor %}

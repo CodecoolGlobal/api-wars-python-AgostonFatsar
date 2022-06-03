@@ -35,7 +35,6 @@ def verify_password(plain_text_password, hashed_password):
     return bcrypt.checkpw(plain_text_password.encode('utf-8'), hashed_bytes_password)
 
 
-
 if __name__ == "__main__":
     app.run(
         debug=True,
