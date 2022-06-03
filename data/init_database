@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS planet_votes;
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY NOT NULL,
+    username VARCHAR UNIQUE,
+    password VARCHAR
+);
+
+CREATE TABLE  planets_votes (
+    id SERIAL PRIMARY KEY NOT NULL,
+    planet_id INTEGER,
+    planet_name VARCHAR,
+    user_id INTEGER,
+    submission_time TIMESTAMP
+);
+
+ALTER TABLE ONLY planets_votes
+    ADD CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
