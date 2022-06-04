@@ -35,21 +35,30 @@ function getData(page='http://swapi.py4e.com/api/planets/') {
 
 function renderHTML(data) {
     table.tableRows.forEach(function(row, index) {
+
         if (index > 0) {
-            let rowCells = row.querySelectorAll("td")
-            let planet = data[index]
-            const newRow = {
-                0: planet["name"],
-                1: Intl.NumberFormat('en-US').format(planet["diameter"]) + " km",
-                2: planet["climate"],
-                3: planet["terrain"],
-                4: planet["surface_water"],
-                5: Intl.NumberFormat('en-US').format(planet["population"]) + " people",
-                6: "residents"
+            let rowCells = row.querySelectorAll("td");
+            let planet = data[index-1];
+            if (planet === undefined) {
+                for (let i = 0; i < 8; i++) {
+                    rowCells[i].innerHTML = "";
+                }
+            } else {
+                console.log(planet);
+                const newRow = {
+                    0: planet["name"],
+                    1: Intl.NumberFormat('en-US').format(planet["diameter"]) + " km",
+                    2: planet["climate"],
+                    3: planet["terrain"],
+                    4: planet["surface_water"],
+                    5: Intl.NumberFormat('en-US').format(planet["population"]) + " people",
+                    6: null // getResidents()
+                }
+                for (let i = 0; i < 8; i++) {
+                    rowCells[i].innerHTML = newRow[i];
+                }
             }
-            for (let i = 0; i < 8; i++) {
-                rowCells[i].innerHTML = newRow[i]
-            }
+
         }
 
     })
@@ -62,3 +71,4 @@ function turnPage() {
 
 fillTableHeader()
 getData()
+turnPage()
