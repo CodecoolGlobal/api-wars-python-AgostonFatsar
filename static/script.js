@@ -3,7 +3,7 @@ const table = {
     tableHead: document.querySelectorAll("th"),
     tableRows: document.querySelectorAll("tr"),
 }
-
+document.g
 const buttons = {
     previous: document.getElementById("previous"),
     next: document.getElementById("next")
@@ -27,13 +27,13 @@ function getData(page='http://swapi.py4e.com/api/planets/') {
         let data = JSON.parse(request.responseText);
         planetPage.next = data['next']
         planetPage.previous = data['previous']
-        renderHTML(data['results']);
+        renderTable(data['results']);
         console.log(data['results'])
     }
     request.send()
 }
 
-function renderHTML(data) {
+function renderTable(data) {
     table.tableRows.forEach(function(row, index) {
 
         if (index > 0) {
@@ -53,7 +53,7 @@ function renderHTML(data) {
                     4: planet["surface_water"],
                     5: Intl.NumberFormat('en-US').format(planet["population"]) + " people",
                     6: null // getResidents()
-                }
+                };
                 for (let i = 0; i < 8; i++) {
                     rowCells[i].innerHTML = newRow[i];
                 }

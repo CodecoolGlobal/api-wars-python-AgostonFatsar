@@ -3,26 +3,56 @@ import bcrypt
 from data import data_handler as dh
 
 app = Flask(__name__)
+app.secret_key = 'scrtky'
 
 
 @app.route('/')
 def main():
-    return render_template('index.html')
+    user = None
+    try:
+        user = session['user']
+    finally:
+        return render_template('index.html', user=user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
-    return render_template("register.html")
+    if request.method == 'GET':
+        return render_template("register.html")
+    else:
+        username = request.form['username']
+        password = request.form['password']
+        password2 = request.form['password2']
+        if password == password2:
+            password = hash_password(password)
+            existing_user = dh.get_user(username)
+            if existing_user:
+                pass
+            else:
+                dh.add_user(username, password)
+                session['user'] = username
+                session['password'] = password
+                return redirect(url_for('main'))
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template("login.html")
+    if request.method == 'GET':
+        return render_template("login.html")
+    else:
+        username = request.form['username']
+        password = request.form['password']
+        user_password = dh.get_user(username)[0]["password"]
+        if verify_password(password, user_password):
+            session['user'] = username
+            session['password'] = password
+            return redirect(url_for('main'))
 
 
 @app.route('/logout')
 def logout():
-    return redirect("index.html")
+    session.pop('user', 'password')
+    return redirect(url_for('main'))
 
 
 def hash_password(plain_text_password):
