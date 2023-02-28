@@ -16,7 +16,7 @@ let planetPage = {
     next: null
 };
 
-let newRow = {
+let planetRow = {
     name: null,
     diameter: null,
     climate: null,
@@ -26,6 +26,17 @@ let newRow = {
     residents: null,
 };
 
+let residentRow = {
+    name: null,
+    height: null,
+    mass: null,
+    hair: null,
+    skin: null,
+    eye: null,
+    birth: null,
+    gender: null
+}
+
 function fillTableHeader() {
     table.tableHead.forEach(function(th, index) {
         th.innerHTML = table.header[index]
@@ -33,47 +44,48 @@ function fillTableHeader() {
 }
 
 function getData(page='http://swapi.py4e.com/api/planets/') {
-    let request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
     request.open('GET', page)
     request.onload = function() {
-        let data = JSON.parse(request.responseText);
+        const data = JSON.parse(request.responseText);
         planetPage.next = data['next']
-        if (planetPage.next === null) {
-            buttons.next.disabled = true
-        } else {
-            buttons.next.disabled = false
-        }
+        buttons.next.disabled = planetPage.next === null;
         planetPage.previous = data['previous']
-        if (planetPage.previous === null) {
-            buttons.previous.disabled = true
-        } else {
-            buttons.previous.disabled = false
-        }
+        buttons.previous.disabled = planetPage.previous === null;
 
         renderTable(data['results']);
     }
     request.send()
+}
 
+function getResidentButton(residents) {
+    return document.createElement("button")
+        .addEventListener("click", (residents) => {
+
+        });
 }
 
 function renderTable(data) {
     table.table.lastElementChild.remove();
-    console.log("removed")
     let tableBody = document.createElement("tbody")
 
     for (let planet of data) {
-        newRow["name"] = planet["name"];
-        newRow["diameter"] = Intl.NumberFormat('en-US').format(planet["diameter"]) + " km";
-        newRow["climate"] = planet["climate"];
-        newRow["terrain"] = planet["terrain"];
-        newRow["water"] = planet["surface_water"];
-        newRow["population"] = Intl.NumberFormat('en-US').format(planet["population"]) + " people";
-        newRow["residents"] = null;// getResidents()
+        planetRow["name"] = planet["name"];
+        planetRow["diameter"] = Intl.NumberFormat('en-US').format(planet["diameter"]) + " km";
+        planetRow["climate"] = planet["climate"];
+        planetRow["terrain"] = planet["terrain"];
+        planetRow["water"] = planet["surface_water"] !== "unknown" ?
+            planet["surface_water"] + "%" : planet["surface_water"];
+        planetRow["population"] = planet["population"] !== "unknown" ?
+            Intl.NumberFormat('en-US').format(planet["population"]) + " people" : planet["population"];
+        planetRow["residents"] = planet["residents"].length === 0 ?
+            "No known residents" : getResidentButton(planet["residents"]);
+        console.log(planet["residents"])
         let row = document.createElement("tr");
 
-        for (let i = 0; i < Object.keys(newRow).length; i++) {
+        for (let i = 0; i < Object.keys(planetRow).length; i++) {
             let cell = document.createElement("td");
-            cell.innerHTML = Object.values(newRow)[i];
+            cell.innerHTML = Object.values(planetRow)[i];
             row.appendChild(cell)
 
         }
@@ -81,37 +93,8 @@ function renderTable(data) {
         table.table.appendChild(tableBody)
     }
 }
-    /*
-    table.tableRows.forEach(function(row, index) {
 
-        if (index > 0) {
-            let rowCells = row.querySelectorAll("td");
-            let planet = data[index-1];
-            if (planet === undefined) {
-                for (let i = 0; i < 8; i++) {
-                    rowCells[i].innerHTML = "";
-                }
-            } else {
-                console.log(planet);
-                const newRow = {
-                    0: planet["name"],
-                    1: Intl.NumberFormat('en-US').format(planet["diameter"]) + " km",
-                    2: planet["climate"],
-                    3: planet["terrain"],
-                    4: planet["surface_water"],
-                    5: Intl.NumberFormat('en-US').format(planet["population"]) + " people",
-                    6: null // getResidents()
-                };
-                for (let i = 0; i < 8; i++) {
-                    rowCells[i].innerHTML = newRow[i];
-                }
-            }
 
-        }
-
-    })
-}
-*/
 function turnPage() {
     buttons.previous.addEventListener("click", function() {getData(planetPage.previous)})
     buttons.next.addEventListener("click", function() {getData(planetPage.next)})
