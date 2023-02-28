@@ -1,5 +1,5 @@
-from flask import Flask, render_template, redirect, url_for, session, escape, request
 import bcrypt
+from flask import Flask, render_template, redirect, url_for, session, request
 import data_handler as dh
 
 app = Flask(__name__)
