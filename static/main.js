@@ -37,6 +37,12 @@ let residentRow = {
     gender: null
 }
 
+
+function turnPage() {
+    buttons.previous.addEventListener("click", function() {getData(planetPage.previous)})
+    buttons.next.addEventListener("click", function() {getData(planetPage.next)})
+}
+
 function fillTableHeader() {
     table.tableHead.forEach(function(th, index) {
         th.innerHTML = table.header[index]
@@ -53,19 +59,13 @@ function getData(page='http://swapi.py4e.com/api/planets/') {
         planetPage.previous = data['previous']
         buttons.previous.disabled = planetPage.previous === null;
 
-        renderTable(data['results']);
+        renderPlanetTable(data['results']);
     }
     request.send()
 }
 
-function getResidentButton(residents) {
-    return document.createElement("button")
-        .addEventListener("click", (residents) => {
 
-        });
-}
-
-function renderTable(data) {
+function renderPlanetTable(data) {
     table.table.lastElementChild.remove();
     let tableBody = document.createElement("tbody")
 
@@ -79,13 +79,16 @@ function renderTable(data) {
         planetRow["population"] = planet["population"] !== "unknown" ?
             Intl.NumberFormat('en-US').format(planet["population"]) + " people" : planet["population"];
         planetRow["residents"] = planet["residents"].length === 0 ?
-            "No known residents" : getResidentButton(planet["residents"]);
-        console.log(planet["residents"])
+            "No known residents" : getResidentModal(planet["name"], planet["residents"]);
         let row = document.createElement("tr");
 
         for (let i = 0; i < Object.keys(planetRow).length; i++) {
             let cell = document.createElement("td");
-            cell.innerHTML = Object.values(planetRow)[i];
+            if (typeof Object.values(planetRow)[i] === "string") {
+                cell.innerText = Object.values(planetRow)[i];
+            } else {
+                cell.appendChild(Object.values(planetRow)[i])
+            }
             row.appendChild(cell)
 
         }
@@ -94,10 +97,51 @@ function renderTable(data) {
     }
 }
 
+function getResidentModal(planet, residents) {
+    const id = planet + "Modal";
+    const modalButton = getButton();
+    modalButton.setAttribute("data-toggle", "modal");
+    modalButton.setAttribute("data-target", `#${id}`);
+    modalButton.innerHTML = `${residents.length} resident(s)`
 
-function turnPage() {
-    buttons.previous.addEventListener("click", function() {getData(planetPage.previous)})
-    buttons.next.addEventListener("click", function() {getData(planetPage.next)})
+    let modal = getModal();
+    console.log(null === modal)
+    modal.setAttribute("id", id);
+    modal.querySelector(".modal-title").innerHTML = `Residents of ${planet}`;
+    modal.querySelector(".modal-body").innerHTML = getResidentTable(residents);
+
+    let modalWithBth = document.createElement("div")
+    modalWithBth.appendChild(modalButton);
+    modalWithBth.appendChild(modal)
+    return modalWithBth
+}
+
+function getResidentTable(residents) {
+    return ""
+}
+
+function getButton() {
+    const button = document.createElement("button")
+    button.setAttribute("class", "btn btn-secondary")
+    return button
+}
+
+function getModal() {
+    let modal = document.createElement("div")
+    modal.setAttribute("class", "modal")
+    modal.innerHTML = '<div class="modal-dialog" role="document">\n' +
+        '    <div class="modal-content">\n' +
+        '      <div class="modal-header">\n' +
+        '        <h5 class="modal-title"></h5>\n' +
+        '      </div>\n' +
+        '      <div class="modal-body">\n' +
+        '      </div>\n' +
+        '      <div class="modal-footer">\n' +
+        '        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>\n' +
+        '      </div>\n' +
+        '    </div>\n' +
+        '  </div>';
+    return modal
 }
 
 fillTableHeader()
