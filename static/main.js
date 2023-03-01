@@ -12,6 +12,7 @@ const buttons = {
 };
 
 let planetPage = {
+    start: 'http://swapi.py4e.com/api/planets/',
     previous: null,
     next: null
 };
@@ -39,8 +40,8 @@ let residentRow = {
 
 
 function turnPage() {
-    buttons.previous.addEventListener("click", function() {getData(planetPage.previous)})
-    buttons.next.addEventListener("click", function() {getData(planetPage.next)})
+    buttons.previous.addEventListener("click", function() {getData(planetPage.previous, updatePlanetTable)})
+    buttons.next.addEventListener("click", function() {getData(planetPage.next, updatePlanetTable)})
 }
 
 function fillTableHeader() {
@@ -49,21 +50,21 @@ function fillTableHeader() {
     });
 }
 
-function getData(page='http://swapi.py4e.com/api/planets/') {
-    const request = new XMLHttpRequest();
-    request.open('GET', page)
-    request.onload = function() {
-        const data = JSON.parse(request.responseText);
-        planetPage.next = data['next']
-        buttons.next.disabled = planetPage.next === null;
-        planetPage.previous = data['previous']
-        buttons.previous.disabled = planetPage.previous === null;
-
-        renderPlanetTable(data['results']);
-    }
-    request.send()
+async function getData(url, dataHandler) {
+    const response = await fetch(url);
+    const json = await response.json();
+    dataHandler(json);
 }
 
+
+function updatePlanetTable(planets) {
+    planetPage.next = planets['next']
+    buttons.next.disabled = planetPage.next === null;
+    planetPage.previous = planets['previous']
+    buttons.previous.disabled = planetPage.previous === null;
+
+    renderPlanetTable(planets['results']);
+}
 
 function renderPlanetTable(data) {
     table.table.lastElementChild.remove();
@@ -145,5 +146,5 @@ function getModal() {
 }
 
 fillTableHeader()
-getData()
+getData(planetPage.start, updatePlanetTable)
 turnPage()
