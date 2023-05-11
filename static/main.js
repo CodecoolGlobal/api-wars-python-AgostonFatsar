@@ -1,4 +1,4 @@
-const table = {
+const planetTable = {
     header: ["Name", "Diameter", "Climate", "Terrain", "Surface Water Percentage", "Population", "Residents", ""],
     tableHead: document.querySelectorAll("th"),
     tableRows: document.querySelectorAll("tr"),
@@ -6,13 +6,14 @@ const table = {
     table: document.querySelector("table")
 };
 
+
 const buttons = {
     previous: document.getElementById("previous"),
     next: document.getElementById("next")
 };
 
 let planetPage = {
-    start: 'http://swapi.py4e.com/api/planets/',
+    start: 'http://swapi.dev/api/planets',
     previous: null,
     next: null
 };
@@ -27,33 +28,37 @@ let planetRow = {
     residents: null,
 };
 
+const residentTableHeader = ["Name", "Height", "Mass", "Hair color", "Skin color", "Eye color", "Birth year", "Gender"]
+
 let residentRow = {
     name: null,
     height: null,
     mass: null,
-    hair: null,
-    skin: null,
-    eye: null,
-    birth: null,
+    hair_color: null,
+    skin_color: null,
+    eye_color: null,
+    birth_year: null,
     gender: null
 }
 
 
+
 function turnPage() {
-    buttons.previous.addEventListener("click", function() {getData(planetPage.previous, updatePlanetTable)})
-    buttons.next.addEventListener("click", function() {getData(planetPage.next, updatePlanetTable)})
+    buttons.previous.addEventListener("click",
+        function() {getData(planetPage.previous).then(updatePlanetTable)});
+    buttons.next.addEventListener("click",
+        function() {getData(planetPage.next).then(updatePlanetTable)});
 }
 
 function fillTableHeader() {
-    table.tableHead.forEach(function(th, index) {
-        th.innerHTML = table.header[index]
+    planetTable.tableHead.forEach(function(th, index) {
+        th.innerHTML = planetTable.header[index]
     });
 }
 
-async function getData(url, dataHandler) {
+async function getData(url) {
     const response = await fetch(url);
-    const json = await response.json();
-    dataHandler(json);
+    return await response.json();
 }
 
 
@@ -67,8 +72,8 @@ function updatePlanetTable(planets) {
 }
 
 function renderPlanetTable(data) {
-    table.table.lastElementChild.remove();
-    let tableBody = document.createElement("tbody")
+    planetTable.table.lastElementChild.remove();
+    let tableBody = create("tbody")
 
     for (let planet of data) {
         planetRow["name"] = planet["name"];
@@ -81,10 +86,10 @@ function renderPlanetTable(data) {
             Intl.NumberFormat('en-US').format(planet["population"]) + " people" : planet["population"];
         planetRow["residents"] = planet["residents"].length === 0 ?
             "No known residents" : getResidentModal(planet["name"], planet["residents"]);
-        let row = document.createElement("tr");
+        let row = create("tr");
 
         for (let i = 0; i < Object.keys(planetRow).length; i++) {
-            let cell = document.createElement("td");
+            let cell = create("td");
             if (typeof Object.values(planetRow)[i] === "string") {
                 cell.innerText = Object.values(planetRow)[i];
             } else {
@@ -93,8 +98,15 @@ function renderPlanetTable(data) {
             row.appendChild(cell)
 
         }
+        if (sessionStorage.getItem("user") === null) {
+            let cell = create("td")
+            let button = getButton();
+            button.innerText = "Vote";
+            cell.appendChild(button);
+            row.appendChild(cell)
+        }
         tableBody.appendChild(row)
-        table.table.appendChild(tableBody)
+        planetTable.table.appendChild(tableBody)
     }
 }
 
@@ -106,29 +118,39 @@ function getResidentModal(planet, residents) {
     modalButton.innerHTML = `${residents.length} resident(s)`
 
     let modal = getModal();
-    console.log(null === modal)
     modal.setAttribute("id", id);
     modal.querySelector(".modal-title").innerHTML = `Residents of ${planet}`;
-    modal.querySelector(".modal-body").innerHTML = getResidentTable(residents);
+    modal.querySelector(".modal-body").appendChild(getResidentTable(residents));
 
-    let modalWithBth = document.createElement("div")
+    let modalWithBth = create("div")
     modalWithBth.appendChild(modalButton);
     modalWithBth.appendChild(modal)
     return modalWithBth
 }
 
 function getResidentTable(residents) {
-    return ""
+    let tableContent = [];
+    residents.forEach((resident) => {
+        getData(resident).then(fillResidentRow);
+        tableContent.push(Object.values(residentRow));
+    })
+    return getTable(residentTableHeader, tableContent)
+}
+
+function fillResidentRow(resident) {
+    for (let key of Object.keys(residentRow)) {
+        residentRow[key] = resident[key];
+    }
 }
 
 function getButton() {
-    const button = document.createElement("button")
+    const button = create("button")
     button.setAttribute("class", "btn btn-secondary")
     return button
 }
 
 function getModal() {
-    let modal = document.createElement("div")
+    let modal = create("div")
     modal.setAttribute("class", "modal")
     modal.innerHTML = '<div class="modal-dialog" role="document">\n' +
         '    <div class="modal-content">\n' +
@@ -145,6 +167,38 @@ function getModal() {
     return modal
 }
 
+function getTable(headers, content) {
+    const table = create("table");
+
+    const thead = create("thead");
+    table.appendChild(thead);
+    const headRow = create("tr");
+    thead.appendChild(headRow);
+    headers.forEach((header) => {
+        const th = create("th");
+        th.innerHTML = header;
+        thead.appendChild(th);
+    })
+
+    const tbody = create("tbody");
+    table.appendChild(tbody);
+    for (let row in content) {
+        const tr = create("tr");
+        tbody.appendChild(tr);
+        for (let cell in row) {
+            const td = create("td");
+            tr.appendChild(td);
+            td.innerHTML = cell;
+        }
+    }
+
+    return table
+}
+
+function create(element) {
+    return document.createElement(element)
+}
+
 fillTableHeader()
-getData(planetPage.start, updatePlanetTable)
+getData(planetPage.start).then(updatePlanetTable)
 turnPage()
