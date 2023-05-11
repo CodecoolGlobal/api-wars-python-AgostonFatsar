@@ -15,6 +15,11 @@ def main():
         return render_template('index.html', user=user)
 
 
+@app.route('/api/voting-stat')
+def get_voting_stat():
+    return dh.get_voting_stat()
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register_user():
     if request.method == 'GET':

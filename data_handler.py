@@ -13,3 +13,10 @@ def get_user(cursor, username):
 def add_user(cursor, username, password):
     query = sql.SQL("""INSERT INTO users(username, password) VALUES (%(username)s, %(password)s)""")
     cursor.execute(query, {'username': username, 'password': password})
+
+
+@connection.connection_handler
+def get_voting_stat(cursor):
+    query = sql.SQL("""SELECT planet_name, COUNT(planet_id) FROM planets_votes GROUP BY planet_name""")
+    cursor.execute(query)
+    return cursor.fetchall()
